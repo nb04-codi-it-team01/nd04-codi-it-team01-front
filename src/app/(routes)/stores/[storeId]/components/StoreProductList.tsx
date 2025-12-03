@@ -40,7 +40,7 @@ const StoreProductList = ({ storeId }: StoreProductListProps) => {
 
   return (
     <div>
-      <p className="text-black01 text-base leading-none font-bold">총 50개 상품</p>
+      <p className="text-black01 text-base leading-none font-bold">총 {data?.totalCount ?? 0}개 상품</p>
       <div className="mt-7.5 flex items-center justify-between">
         <ProductSort
           sorted={sorted}
