@@ -46,7 +46,7 @@ export default function MypageHeader() {
             onClick={handleClick}
             className="text-black01 cursor-pointer text-lg font-extrabold underline"
           >
-            {user.grade.name}
+            {user.grade?.name}
           </div>
           <span className="text-black01 text-lg font-normal">| 포인트 {user.points.toLocaleString()}</span>
           <BuyerLevelModal

@@ -5,7 +5,7 @@ import Image from "next/image";
 interface BuyerLevelModalProps {
   isOpen: boolean;
   onClose: () => void;
-  grade: UserGrade;
+  grade: UserGrade | null;
 }
 
 export default function BuyerLevelModal({ isOpen, onClose, grade }: BuyerLevelModalProps) {
@@ -41,12 +41,12 @@ export default function BuyerLevelModal({ isOpen, onClose, grade }: BuyerLevelMo
             height={24}
           />
         </button>
-        <span className="text-black01 text-lg font-extrabold">내 등급 {grade.name}</span>
+        <span className="text-black01 text-lg font-extrabold">내 등급 {grade?.name || "-"}</span>
         <div className="flex h-full w-full flex-col gap-5">
           {Level.map((item) => (
             <div
               key={item.id}
-              className={`flex justify-between ${item.title === grade.name ? "text-primary" : ""}`}
+              className={`flex justify-between ${item.title === grade?.name ? "text-primary" : ""}`}
             >
               <span className="text-sm/4 font-bold">{item.title}</span>
               <span className="text-sm/4 font-normal">{item.condition}</span>

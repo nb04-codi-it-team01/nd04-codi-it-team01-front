@@ -23,7 +23,7 @@ export interface User {
     name: string;
     rate: number;
     minAmount: number;
-  };
+  } | null;
 }
 
 export interface LoginResponse {
