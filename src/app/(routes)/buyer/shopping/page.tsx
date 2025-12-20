@@ -111,7 +111,7 @@ export default function ShoppingPage() {
     .reduce((sum, item) => {
       const price = item.product.price;
       const discountRate = item.product.discountRate;
-      const discountedPrice = price * (1 - discountRate / 100);
+      const discountedPrice = Math.floor(price * (1 - discountRate / 100));
       const itemTotal = discountedPrice * item.quantity;
       return sum + itemTotal;
     }, 0);

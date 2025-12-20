@@ -182,7 +182,7 @@ const ProductInfo = ({ productId, data }: ProductInfoProps) => {
           <div className="text-gray01 text-lg">
             <div className="flex">
               <p>판매가</p>
-              <p className="text-black01 ml-22.5 font-extrabold">{data.discountPrice.toLocaleString()}원</p>
+              <p className="text-black01 ml-22.5 font-extrabold">{Math.floor(data.discountPrice).toLocaleString()}원</p>
               {data.discountRate !== 0 && (
                 <p className="ml-2 font-bold line-through">{data.price.toLocaleString()}원</p>
               )}

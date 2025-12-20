@@ -13,7 +13,7 @@ export default function OrderProductList() {
             key={item.id}
             name={item.product.name}
             size={item.sizeId}
-            price={(item.product.price * (1 - item.product.discountRate / 100)).toLocaleString() + "원"}
+            price={Math.floor(item.product.price * (1 - item.product.discountRate / 100)).toLocaleString() + "원"}
             count={item.quantity}
             imageUrl={item.product.image}
           />
