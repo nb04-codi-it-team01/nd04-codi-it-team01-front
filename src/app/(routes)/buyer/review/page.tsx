@@ -21,31 +21,32 @@ export default function ReviewPage() {
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: ["orders", selectedTab],
     queryFn: async ({ pageParam = 1 }) => {
+      // 👇 [수정 1] 탭에 맞춰서 백엔드로 보낼 파라미터 결정
+      let reviewTypeParam: "available" | "completed" | undefined;
+      if (selectedTab === "writable") reviewTypeParam = "available";
+      else if (selectedTab === "done") reviewTypeParam = "completed";
+
       const { data } = await axiosInstance.get<OrdersResponse>("/orders", {
         params: {
           status: "CompletedPayment",
           limit: 3,
           page: pageParam,
+          reviewType: reviewTypeParam, // 👈 [핵심] 백엔드에 필터링 요청!
         },
       });
 
       // 모든 주문의 orderItems를 하나의 배열로 합치기
       const items: OrderItemResponse[] = data.data.flatMap((order) => order.orderItems);
 
-      // 탭에 따라 아이템 필터링
-      const filteredItems = items.filter((item) => {
-        switch (selectedTab) {
-          case "writable":
-            return !item.isReviewed;
-          case "done":
-            return item.isReviewed;
-          default:
-            return true;
-        }
+      // ❌ [삭제] 클라이언트 사이드 필터링 로직 제거
+      // (백엔드에서 이미 걸러져서 오므로 더 이상 필요 없습니다)
+      /* const filteredItems = items.filter((item) => {
+        switch (selectedTab) { ... }
       });
+      */
 
       return {
-        items: filteredItems,
+        items, // filteredItems 대신 그냥 items 반환
         nextPage: pageParam < data.meta.totalPages ? pageParam + 1 : undefined,
         totalPages: data.meta.totalPages,
       };

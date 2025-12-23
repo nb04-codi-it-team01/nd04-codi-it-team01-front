@@ -49,12 +49,20 @@ export default function ItemCard({ purchases }: ItemCardProps) {
             </div>
           </div>
           <Button
-            label={item.isReviewed ? "리뷰 보기" : "리뷰 쓰기"}
+            label={!item.productId ? "상품 정보 없음" : item.isReviewed ? "리뷰 보기" : "리뷰 쓰기"}
             size="medium"
             variant="secondary"
             color={item.isReviewed ? "white" : "black"}
-            className="h-[3.75rem] w-[12.5rem] px-[1.875rem] py-[0.875rem] font-bold"
+            // 1. [스타일 수정] disabled 상태일 때 회색 배경 + 클릭 금지 커서 적용
+            className={`h-[3.75rem] w-[12.5rem] px-[1.875rem] py-[0.875rem] font-bold ${
+              !item.productId ? "cursor-not-allowed border-none bg-gray-300 text-gray-500 hover:bg-gray-300" : ""
+            }`}
+            // 2. [기능 수정] disabled 속성 전달 (Button 컴포넌트가 지원한다면)
+            disabled={!item.productId}
             onClick={() => {
+              // 3. [방어 코드] 혹시나 클릭되더라도 함수를 즉시 종료
+              if (!item.productId) return;
+
               if (item.isReviewed) setReviewViewTarget(item);
               else setReviewWriteTarget(item);
             }}
