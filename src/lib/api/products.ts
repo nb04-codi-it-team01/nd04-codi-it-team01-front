@@ -16,6 +16,13 @@ interface GetProductsParams {
   categoryName?: string;
 }
 
+interface GetProductInquiryParams {
+  page?: number;
+  pageSize?: number;
+  sort?: "oldest" | "recent";
+  status?: "CompletedAnswer" | "WaitingAnswer";
+}
+
 // 새 상품 등록
 export const createProduct = async (data: ProductFormValues): Promise<ProductInfoData> => {
   const axiosInstance = getAxiosInstance();
@@ -67,9 +74,9 @@ export const deleteProduct = async (productId: string) => {
 };
 
 // 상품 문의 조회
-export const getProductInquiry = async (productId: string): Promise<ProductInquiryResponse> => {
+export const getProductInquiry = async (productId: string, query: GetProductInquiryParams): Promise<ProductInquiryResponse> => {
   const axiosInstance = getAxiosInstance();
-  const response = await axiosInstance.get(`/products/${productId}/inquiries`);
+  const response = await axiosInstance.get(`/products/${productId}/inquiries`, { params: query });
   return response.data;
 };
 

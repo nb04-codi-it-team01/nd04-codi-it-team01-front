@@ -12,10 +12,10 @@ interface PieChartProps {
 const DashboardPieChart = ({ data }: PieChartProps) => {
   const formattedData = data?.map((item) => {
     return {
-      id: item.products.id,
-      name: item.products.name,
+      id: item.product.id,
+      name: item.product.name,
       totalOrders: item.totalOrders,
-      totalPrice: item.products.price * item.totalOrders,
+      totalPrice: item.product.price * item.totalOrders,
     };
   });
 
