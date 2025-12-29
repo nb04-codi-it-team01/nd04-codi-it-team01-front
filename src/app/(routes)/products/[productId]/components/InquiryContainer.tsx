@@ -12,11 +12,12 @@ import InquiryList from "./InquiryList";
 
 interface InquiryContainerProps {
   productId: string;
+  storeOwnerId: string; // ✅ 추가: 판매자 ID를 받아야 함
 }
 
 const ITEMS_PER_PAGE = 5;
 
-const InquiryContainer = ({ productId }: InquiryContainerProps) => {
+const InquiryContainer = ({ productId, storeOwnerId }: InquiryContainerProps) => {
   const [currentPage, setCurrentPage] = useState(1); // 현재 페이지
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user } = useUserStore();
@@ -64,6 +65,7 @@ const InquiryContainer = ({ productId }: InquiryContainerProps) => {
       {data?.list && (
         <InquiryList
           data={data.list}
+          storeOwnerId={storeOwnerId}
         />
       )}
       <PageButton

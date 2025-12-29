@@ -82,6 +82,7 @@ export interface ProductInfoData {
   category: Category;
   stocks: Stock[];
   store?: CartStore;
+  ownerId: string;
 }
 
 // 카테고리

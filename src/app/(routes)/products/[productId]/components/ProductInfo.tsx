@@ -38,7 +38,7 @@ const ProductInfo = ({ productId, data }: ProductInfoProps) => {
   const { data: cartData, refetch: refetchCartData } = useQuery({
     queryKey: ["cartData"],
     queryFn: () => getCart(),
-    enabled: user !== null,
+    enabled: !!user && user.type !== "SELLER",
     select: (data): CartEditSize[] => {
       return data.items
         .filter((i) => {
@@ -198,6 +198,7 @@ const ProductInfo = ({ productId, data }: ProductInfoProps) => {
                   alt="icon"
                   width={24}
                   height={24}
+                  style={{ width: "auto" }}
                 />
               </div>
             </OptionSelect>

@@ -7,14 +7,26 @@ import { useState } from "react";
 
 interface InquiryProps {
   inquiry: InquiryData;
+  storeOwnerId: string;
 }
 
-const Inquiry = ({ inquiry }: InquiryProps) => {
+const Inquiry = ({ inquiry, storeOwnerId }: InquiryProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { user } = useUserStore();
 
+  // ✅ 권한 체크 로직 추가
+  const isWriter = user ? String(user.id) === String(inquiry.userId) : false;
+  const isSeller = user ? String(user.id) === String(storeOwnerId) : false;
+  console.log("User Object:", user);
+  // 비밀글이 아니거나, 작성자거나, 판매자면 볼 수 있음
+  const canRead = !inquiry.isSecret || isWriter || isSeller;
+
   const handleToggle = () => {
-    if (inquiry.isSecret && inquiry.userId !== user?.id) return;
+    // ✅ canRead 조건으로 변경
+    if (!canRead) {
+      alert("비밀글은 작성자와 판매자만 확인할 수 있습니다."); // UX 개선용 알림
+      return;
+    }
     setIsOpen((prev) => !prev);
   };
 
@@ -26,6 +38,7 @@ const Inquiry = ({ inquiry }: InquiryProps) => {
       <p className="w-1/5">{inquiry.user?.name}</p>
       <p className="w-1/10">{formatDate(inquiry.createdAt)}</p>
 
+      {/* ✅ isOpen 조건만 남기고, 내부에서 분기 처리 */}
       {isOpen ? (
         <div className="w-1/2 space-y-10 pl-25 text-left text-base leading-relaxed">
           <div className="flex gap-5">
@@ -49,10 +62,12 @@ const Inquiry = ({ inquiry }: InquiryProps) => {
             </div>
           )}
         </div>
-      ) : inquiry.isSecret ? (
-        <p className="text-gray01 w-1/2 pl-25 text-left">비밀글입니다.</p>
       ) : (
-        <p className="w-1/2 pl-25 text-left">{inquiry.title}</p>
+        // 닫혀있을 때 보여줄 텍스트
+        <p className={`w-1/2 pl-25 text-left ${!canRead ? "text-gray01" : ""}`}>
+          {/* 권한 없으면 '비밀글입니다', 권한 있으면 제목 표시 */}
+          {!canRead ? "비밀글입니다." : inquiry.title}
+        </p>
       )}
 
       <p className="w-1/5">{inquiry.status === "WaitingAnswer" ? "대기 중" : "답변완료"}</p>
