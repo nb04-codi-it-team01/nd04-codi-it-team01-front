@@ -4,7 +4,6 @@ import Divder from "@/components/divider/Divder";
 import BoxInput from "@/components/input/BoxInput";
 import TextArea from "@/components/input/TextArea";
 import { PostInquiryParams, getProductDetail, postProductInquiry } from "@/lib/api/products";
-import { getStoreDetail } from "@/lib/api/store";
 import { inquiryCreateForm, inquiryCreateSchemas } from "@/lib/schemas/inquiryCreate.schemas";
 import { useToaster } from "@/proviers/toaster/toaster.hook";
 import { useUserStore } from "@/stores/userStore";
