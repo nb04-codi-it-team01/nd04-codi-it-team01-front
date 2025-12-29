@@ -3,7 +3,10 @@
 import formatDate from "@/lib/functions/dateFormat";
 import { useUserStore } from "@/stores/userStore";
 import { InquiryData } from "@/types/inquiry";
+import Image from "next/image";
 import { useState } from "react";
+
+// 맨 위에 추가
 
 interface InquiryProps {
   inquiry: InquiryData;
@@ -63,10 +66,21 @@ const Inquiry = ({ inquiry, storeOwnerId }: InquiryProps) => {
           )}
         </div>
       ) : (
-        // 닫혀있을 때 보여줄 텍스트
-        <p className={`w-1/2 pl-25 text-left ${!canRead ? "text-gray01" : ""}`}>
-          {/* 권한 없으면 '비밀글입니다', 권한 있으면 제목 표시 */}
-          {!canRead ? "비밀글입니다." : inquiry.title}
+        // 닫혀있을 때 (목록에 보이는 부분)
+        <p className={`flex w-1/2 items-center gap-2 pl-25 text-left ${!canRead ? "text-gray01" : ""}`}>
+          {/* ✅ LockIcon 컴포넌트 대신 프로젝트에 있는 이미지를 사용 */}
+          {inquiry.isSecret && (
+            <Image
+              src="/icon/icon_lock.svg"
+              alt="secret"
+              width={16} // 텍스트 크기에 맞춰 조절 (보통 16~20)
+              height={16}
+              className="mb-0.5" // 텍스트와 높이 맞춤 보정
+            />
+          )}
+
+          {/* 텍스트 표시 */}
+          <span>{!canRead ? "비밀글입니다." : inquiry.title}</span>
         </p>
       )}
 
