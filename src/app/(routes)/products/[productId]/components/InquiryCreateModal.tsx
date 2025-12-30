@@ -6,6 +6,7 @@ import TextArea from "@/components/input/TextArea";
 import { PostInquiryParams, getProductDetail, postProductInquiry } from "@/lib/api/products";
 import { inquiryCreateForm, inquiryCreateSchemas } from "@/lib/schemas/inquiryCreate.schemas";
 import { useToaster } from "@/proviers/toaster/toaster.hook";
+import { useUserStore } from "@/stores/userStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -18,6 +19,9 @@ interface InquiryCreateModalProps {
 }
 
 export default function InquiryCreateModal({ productId, onClose }: InquiryCreateModalProps) {
+  const user = useUserStore((state) => state.user);
+  const toaster = useToaster();
+
   const {
     register,
     handleSubmit,
@@ -34,12 +38,13 @@ export default function InquiryCreateModal({ productId, onClose }: InquiryCreate
     },
   });
   const isSecret = watch("isSecret");
-  const toaster = useToaster();
 
-  const { data } = useQuery({
+  const { data: productData } = useQuery({
     queryKey: ["product", productId],
     queryFn: () => getProductDetail(productId),
   });
+
+  const isSeller = user?.type === "SELLER";
 
   const mutation = useMutation({
     mutationFn: (data: PostInquiryParams) => postProductInquiry(data),
@@ -58,8 +63,13 @@ export default function InquiryCreateModal({ productId, onClose }: InquiryCreate
     },
   });
 
-  const onSubmit = (data: inquiryCreateForm) => {
-    mutation.mutate({ productId, ...data });
+  const onSubmit = (formData: inquiryCreateForm) => {
+    // ✅ 판매자면 차단
+    if (isSeller) {
+      toaster("error", "판매자 계정으로는 문의를 등록할 수 없습니다.");
+      return;
+    }
+    mutation.mutate({ productId, ...formData });
   };
 
   return (
@@ -81,20 +91,27 @@ export default function InquiryCreateModal({ productId, onClose }: InquiryCreate
           />
         </button>
       </div>
-      <Divder className="mt-5 mb-10" />{" "}
+      <Divder className="mt-5 mb-10" /> {/* 본인 상품일 경우 경고 문구 표시 */}
+      {isSeller && (
+        <div className="mb-5 rounded-md bg-red-50 p-3 text-sm font-bold text-red-500">
+          ※ 판매자 계정으로는 상품 문의를 이용할 수 없습니다.
+        </div>
+      )}
       <div className="mb-10 flex w-130 gap-5">
-        {data && (
+        {productData && (
           <Image
             className="h-20 w-20 rounded-md object-cover"
-            src={data?.image}
+            src={productData?.image}
             alt="image"
             width={80}
             height={80}
           />
         )}
         <div className="flex w-105 flex-col justify-center gap-2.5">
-          <p className="text-gray01 text-base leading-none">{data?.storeName}</p>
-          <p className="overflow-hidden text-lg leading-none font-bold text-ellipsis whitespace-nowrap">{data?.name}</p>
+          <p className="text-gray01 text-base leading-none">{productData?.storeName}</p>
+          <p className="overflow-hidden text-lg leading-none font-bold text-ellipsis whitespace-nowrap">
+            {productData?.name}
+          </p>
         </div>
       </div>
       <form
@@ -104,6 +121,7 @@ export default function InquiryCreateModal({ productId, onClose }: InquiryCreate
         <Controller
           name="title"
           control={control}
+          disabled={isSeller}
           render={({ field }) => (
             <BoxInput
               label="제목"
@@ -121,6 +139,7 @@ export default function InquiryCreateModal({ productId, onClose }: InquiryCreate
         <TextArea
           label="문의 내용"
           placeholder="궁금한 내용을 입력해 주세요"
+          disabled={isSeller}
           {...register("content")}
         />
         {errors.content && <p className="mt-[-2rem] text-red-500">{errors.content.message}</p>}
@@ -139,7 +158,8 @@ export default function InquiryCreateModal({ productId, onClose }: InquiryCreate
             size="large"
             variant="primary"
             color="black"
-            className="h-16.25 w-full"
+            className={`h-16.25 w-full ${isSeller ? "cursor-not-allowed opacity-50" : ""}`}
+            disabled={isSeller}
           />
         </div>
       </form>

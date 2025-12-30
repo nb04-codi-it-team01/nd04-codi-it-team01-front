@@ -4,9 +4,10 @@ import Inquiry from "./Inquiry";
 
 interface InquiryListProps {
   data: InquiryData[];
+  storeOwnerId: string;
 }
 
-const InquiryList = ({ data }: InquiryListProps) => {
+const InquiryList = ({ data, storeOwnerId }: InquiryListProps) => {
   const sortedInquiries = [...data].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return (
@@ -22,6 +23,7 @@ const InquiryList = ({ data }: InquiryListProps) => {
         <Inquiry
           key={inquiry.id}
           inquiry={inquiry}
+          storeOwnerId={storeOwnerId}
         />
       ))}
     </div>

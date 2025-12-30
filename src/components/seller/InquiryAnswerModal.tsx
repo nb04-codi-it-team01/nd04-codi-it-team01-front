@@ -123,7 +123,7 @@ export default function InquiryAnswerModal({ type, open, inquiry, onClose }: Inq
           <div className="mb-3 flex items-center gap-5">
             <div className="relative h-20 w-20">
               <Image
-                src={hasError ? "/images/Mask-group.svg" : (inquiry.product.image ?? "/images/Mask-group.svg")}
+                src={hasError ? "/images/mask-group.svg" : inquiry.product.image || "/images/Mask-group.svg"}
                 alt={inquiry.product.name ?? "상품 이미지"}
                 fill
                 className="rounded-md object-cover"

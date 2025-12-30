@@ -2,6 +2,7 @@
 
 import Divder from "@/components/divider/Divder";
 import { getProductDetail } from "@/lib/api/products";
+import { getStoreDetail } from "@/lib/api/store";
 import { useQuery } from "@tanstack/react-query";
 import { use } from "react";
 import InquiryContainer from "./components/InquiryContainer";
@@ -14,6 +15,11 @@ const ProductDetailPage = ({ params }: { params: Promise<{ productId: string }> 
     queryKey: ["product", productId],
     queryFn: () => getProductDetail(productId),
   });
+  const { data: storeDetail } = useQuery({
+    queryKey: ["store", productDetail?.storeId],
+    queryFn: () => getStoreDetail(productDetail!.storeId),
+    enabled: !!productDetail?.storeId,
+  });
 
   return (
     <div className="w-380">
@@ -24,7 +30,10 @@ const ProductDetailPage = ({ params }: { params: Promise<{ productId: string }> 
         />
       )}
       <Divder className="my-20" />
-      <InquiryContainer productId={productId} />
+      <InquiryContainer
+        productId={productId}
+        storeOwnerId={storeDetail ? String(storeDetail.userId) : ""}
+      />
       <Divder className="mt-9.5 mb-24" />
       <ReviewContainer
         productId={productId}

@@ -9,11 +9,13 @@ export function transformToFormValues(data: ProductInfoData): ProductFormValues 
     return date.toISOString().slice(0, 16);
   };
 
+  const categoryData = data.category as { name: string } | { name: string }[];
+  const categoryName = Array.isArray(categoryData) ? categoryData[0]?.name : categoryData?.name;
   return {
     name: data.name,
     image: data.image ?? null,
     price: data.price,
-    category: data.category.name.toUpperCase() as CategoryType,
+    category: (categoryName?.toUpperCase() || "TOP") as CategoryType,
     sizes: data.stocks.map((s) => s.size.name.toUpperCase()),
     stocks: data.stocks.reduce<Record<string, number>>((acc, curr) => {
       acc[curr.size.name.toUpperCase()] = curr.quantity;
