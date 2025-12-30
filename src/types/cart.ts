@@ -38,6 +38,7 @@ export interface CartProduct {
   discountRate: number;
   discountStartTime: string | null;
   discountEndTime: string | null;
+  discountPrice: number;
   createdAt: string;
   updatedAt: string;
   reviewsRating: number;

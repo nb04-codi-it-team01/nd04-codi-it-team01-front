@@ -34,7 +34,7 @@ const ProductInfo = ({ productId, data }: ProductInfoProps) => {
   const setSelectedItems = useOrderStore((state) => state.setSelectedItems);
   const router = useRouter();
   const toaster = useToaster();
-  const safePrice = Math.floor(data.price * (1 - data.discountRate / 100));
+  const safePrice = data.discountPrice;
 
   const { data: cartData, refetch: refetchCartData } = useQuery({
     queryKey: ["cartData"],
@@ -185,9 +185,7 @@ const ProductInfo = ({ productId, data }: ProductInfoProps) => {
               <p>판매가</p>
               {/* <p className="text-black01 ml-22.5 font-extrabold">{Math.floor(data.discountPrice).toLocaleString()}원</p> */}
               <p className="text-black01 ml-22.5 font-extrabold">{safePrice.toLocaleString()}원</p>
-              {data.discountRate !== 0 && (
-                <p className="ml-2 font-bold line-through">{data.price.toLocaleString()}원</p>
-              )}
+              {data.price > safePrice && <p className="ml-2 font-bold line-through">{data.price.toLocaleString()}원</p>}
             </div>
             <OptionSelect
               options={data.stocks}
