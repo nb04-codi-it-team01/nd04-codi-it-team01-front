@@ -55,7 +55,9 @@ export default function ItemCard({ purchases }: ItemCardProps) {
             color={item.isReviewed ? "white" : "black"}
             // 1. [스타일 수정] disabled 상태일 때 회색 배경 + 클릭 금지 커서 적용
             className={`h-[3.75rem] w-[12.5rem] px-[1.875rem] py-[0.875rem] font-bold ${
-              !item.productId ? "cursor-not-allowed border-none bg-gray-300 text-gray-500 hover:bg-gray-300" : ""
+              !item.productId
+                ? "!hover:bg-gray-300 !cursor-not-allowed !border-none !bg-gray-300 !text-gray-500" // !를 붙여서 강제 적용
+                : ""
             }`}
             // 2. [기능 수정] disabled 속성 전달 (Button 컴포넌트가 지원한다면)
             disabled={!item.productId}
