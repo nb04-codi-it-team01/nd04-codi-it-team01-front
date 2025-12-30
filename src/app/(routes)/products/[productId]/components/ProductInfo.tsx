@@ -34,6 +34,7 @@ const ProductInfo = ({ productId, data }: ProductInfoProps) => {
   const setSelectedItems = useOrderStore((state) => state.setSelectedItems);
   const router = useRouter();
   const toaster = useToaster();
+  const safePrice = Math.floor(data.price * (1 - data.discountRate / 100));
 
   const { data: cartData, refetch: refetchCartData } = useQuery({
     queryKey: ["cartData"],
@@ -182,7 +183,8 @@ const ProductInfo = ({ productId, data }: ProductInfoProps) => {
           <div className="text-gray01 text-lg">
             <div className="flex">
               <p>판매가</p>
-              <p className="text-black01 ml-22.5 font-extrabold">{Math.floor(data.discountPrice).toLocaleString()}원</p>
+              {/* <p className="text-black01 ml-22.5 font-extrabold">{Math.floor(data.discountPrice).toLocaleString()}원</p> */}
+              <p className="text-black01 ml-22.5 font-extrabold">{safePrice.toLocaleString()}원</p>
               {data.discountRate !== 0 && (
                 <p className="ml-2 font-bold line-through">{data.price.toLocaleString()}원</p>
               )}
@@ -208,7 +210,8 @@ const ProductInfo = ({ productId, data }: ProductInfoProps) => {
             {options.map((option) => (
               <ProductOptions
                 key={option.sizeId}
-                price={data.discountPrice}
+                // price={data.discountPrice}
+                price={safePrice}
                 option={option}
                 setOptions={setOptions}
                 stock={data.stocks}
@@ -220,7 +223,8 @@ const ProductInfo = ({ productId, data }: ProductInfoProps) => {
             <div className="my-7.5 flex items-center justify-between">
               <p className="text-black01 text-lg leading-none font-extrabold">총 주문 금액</p>
               <p className="text-black01 text-4xl leading-10.5 font-extrabold">
-                {(data.discountPrice !== undefined && data.discountPrice * totalCount).toLocaleString()}원
+                {/* {(data.discountPrice !== undefined && data.discountPrice * totalCount).toLocaleString()}원 */}
+                {(safePrice * totalCount).toLocaleString()}원
               </p>
             </div>
             <div className="flex justify-between gap-5">
