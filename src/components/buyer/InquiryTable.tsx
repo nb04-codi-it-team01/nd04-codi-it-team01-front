@@ -61,7 +61,13 @@ export default function InquiryTable({ inquiries, userType }: InquiryTableProps)
             <div className="flex flex-1 items-center gap-5">
               <div className="relative h-16 w-16 flex-shrink-0">
                 <Image
-                  src={imageErrorMap[item.product.image] ? "/images/Mask-group.svg" : item.product.image}
+                  src={
+                    item.product.image && item.product.image !== ""
+                      ? imageErrorMap[item.product.image]
+                        ? "/images/Mask-group.svg"
+                        : item.product.image
+                      : "/images/Mask-group.svg"
+                  }
                   alt={item.product.name}
                   fill
                   className="rounded-xl object-cover"
