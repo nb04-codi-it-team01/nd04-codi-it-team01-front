@@ -31,7 +31,8 @@ interface CartItemCardProps {
 }
 
 export default function CartItemCard({ item, isChecked, onCheck, onQuantityChange, onDelete }: CartItemCardProps) {
-  const discountedPrice = item.product.price * (1 - item.product.discountRate / 100);
+  const discountedPrice = item.product.discountPrice;
+  // const discountedPrice = item.product.price * (1 - item.product.discountRate / 100);
   const totalPrice = discountedPrice * item.quantity;
 
   return (
@@ -71,12 +72,13 @@ export default function CartItemCard({ item, isChecked, onCheck, onQuantityChang
                   />
                 </div>
                 <div className="flex flex-col items-end gap-2">
-                  {item.product.discountRate > 0 && (
+                  {item.product.price > discountedPrice && (
                     <div className="flex items-center gap-4">
                       <p className="text-gray01 text-base line-through">{item.product.price.toLocaleString()}원</p>
                       <p className="text-red01 text-base font-bold">{item.product.discountRate}% 할인</p>
                     </div>
                   )}
+
                   <div className="flex flex-col items-end gap-1">
                     <p className="text-lg font-extrabold">{discountedPrice.toLocaleString()}원</p>
                     <p className="text-black01 text-base">총 {totalPrice.toLocaleString()}원</p>

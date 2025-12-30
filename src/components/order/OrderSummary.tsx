@@ -38,9 +38,7 @@ export default function OrderSummary({ onClick }: OrderSummaryProps) {
 
   // 총 상품금액 계산
   const subtotal = selectedItems.reduce((sum, item) => {
-    const price = item.product.price;
-    const discountRate = item.product.discountRate;
-    const discountedPrice = Math.floor(price * (1 - discountRate / 100));
+    const discountedPrice = item.product.discountPrice;
     return sum + discountedPrice * item.quantity;
   }, 0);
 
