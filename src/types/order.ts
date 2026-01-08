@@ -1,3 +1,5 @@
+// src/types/order.ts
+
 export interface OrderItem {
   id: string;
   price: number;
@@ -11,6 +13,11 @@ export interface OrderItem {
       rating: number;
       content: string;
       createdAt: string;
+      // ✅ [추가] 닉네임과 수정일 정보 추가
+      updatedAt?: string;
+      user: {
+        name: string;
+      };
     }>;
   };
   size: {
@@ -77,6 +84,11 @@ export interface OrderItemResponse {
       rating: number;
       content: string;
       createdAt: string;
+      // ✅ [추가] 여기도 똑같이 추가해줘야 ReviewViewModal 에러가 사라집니다.
+      updatedAt?: string;
+      user: {
+        name: string;
+      };
     }[];
   };
   size: {
