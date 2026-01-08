@@ -74,7 +74,7 @@ export default function EditProfilePage() {
     try {
       // DELETE 요청은 body를 보낼 때 'data' 옵션을 사용해야 합니다.
       await axiosInstance.delete("/users/delete", {
-        data: { password: withdrawPassword }, // 백엔드로 비밀번호 전송
+        data: { currentPassword: withdrawPassword }, // 백엔드로 비밀번호 전송
       });
 
       setIsWithdrawModalOpen(false); // 모달 닫기
@@ -84,9 +84,13 @@ export default function EditProfilePage() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("회원 탈퇴 실패:", error);
-      // 백엔드에서 비밀번호 틀렸을 때 400이나 401을 준다고 가정
-      if (error.response?.status === 401 || error.response?.status === 400) {
-        toaster("warn", "비밀번호가 일치하지 않습니다.");
+
+      const status = error.response?.status;
+      const serverMessage = error.response?.data?.message; // 백엔드에서 보낸 message
+
+      if (status === 401 || status === 400) {
+        // 백엔드 메시지가 있으면 그걸 쓰고, 없으면 기본 메시지 출력
+        toaster("warn", serverMessage || "비밀번호가 일치하지 않습니다.");
       } else {
         toaster("warn", "회원 탈퇴 중 오류가 발생했습니다.");
       }
