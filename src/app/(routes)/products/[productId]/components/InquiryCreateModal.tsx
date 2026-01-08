@@ -28,7 +28,7 @@ export default function InquiryCreateModal({ productId, onClose }: InquiryCreate
     control,
     watch,
     setValue,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<inquiryCreateForm>({
     resolver: zodResolver(inquiryCreateSchemas),
     defaultValues: {
@@ -72,16 +72,29 @@ export default function InquiryCreateModal({ productId, onClose }: InquiryCreate
     mutation.mutate({ productId, ...formData });
   };
 
+  // ✨ [추가] 닫기 핸들러
+  const handleClose = () => {
+    // 폼에 입력한 내용이 있으면(더러워졌으면) 물어보기
+    if (isDirty) {
+      if (confirm("작성 중인 문의 내용이 사라집니다. 정말 닫으시겠습니까?")) {
+        onClose();
+      }
+    } else {
+      // 입력한 게 없으면 그냥 닫기
+      onClose();
+    }
+  };
+
   return (
     <Modal
       isOpen={true}
-      onClose={onClose}
+      onClose={handleClose}
     >
       <div className="text-black01 relative text-[1.75rem] leading-none font-extrabold">
         <h2>상품 문의</h2>
         <button
           className="absolute top-0 right-0"
-          onClick={onClose}
+          onClick={handleClose}
         >
           <Image
             src="/icon/deleteBlack.svg"
@@ -150,7 +163,7 @@ export default function InquiryCreateModal({ productId, onClose }: InquiryCreate
             variant="secondary"
             color="white"
             className="h-16.25 w-full"
-            onClick={onClose}
+            onClick={handleClose}
           />
           <Button
             type="submit"

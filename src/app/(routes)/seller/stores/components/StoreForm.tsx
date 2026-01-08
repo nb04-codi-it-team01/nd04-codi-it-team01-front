@@ -21,7 +21,7 @@ export default function StoreForm({ mode, onClose, onSubmit, defaultValues, imag
     register,
     handleSubmit,
     control,
-    formState: { errors },
+    formState: { errors, isDirty },
     reset,
   } = useForm<StoreCreateForm>({
     resolver: zodResolver(storeCreateSchema),
@@ -76,10 +76,22 @@ export default function StoreForm({ mode, onClose, onSubmit, defaultValues, imag
     }
   }, [imagePreviewUrl]);
 
+  // ✨ [수정 2] 닫기 동작을 가로채는 핸들러 함수 생성
+  const handleClose = () => {
+    // 폼 값이 하나라도 변경되었다면(isDirty === true) 확인 창을 띄움
+    if (isDirty) {
+      if (confirm("작성 중인 내용이 사라집니다. 정말 닫으시겠습니까?")) {
+        onClose(); // 사용자가 확인을 누르면 진짜 닫기
+      }
+    } else {
+      onClose(); // 변경 사항이 없으면 바로 닫기
+    }
+  };
+
   return (
     <Modal
       isOpen={true}
-      onClose={onClose}
+      onClose={handleClose}
     >
       <form
         onSubmit={handleSubmit(onSubmit)}
@@ -90,7 +102,7 @@ export default function StoreForm({ mode, onClose, onSubmit, defaultValues, imag
           <div className="bg-gray04 mt-5 mb-10 h-px w-full" />
           <button
             className="absolute top-0 right-0"
-            onClick={onClose}
+            onClick={handleClose}
             type="button"
           >
             <Image
@@ -184,7 +196,7 @@ export default function StoreForm({ mode, onClose, onSubmit, defaultValues, imag
             size="large"
             variant="secondary"
             color="white"
-            onClick={onClose}
+            onClick={handleClose}
             className="h-[65px] w-full text-[18px]"
           />
           <Button

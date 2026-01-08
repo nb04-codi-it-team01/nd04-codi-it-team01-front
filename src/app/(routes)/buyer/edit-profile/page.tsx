@@ -17,16 +17,29 @@ import { useState } from "react";
 
 export default function EditProfilePage() {
   const [nickname, setNickname] = useState("");
+
+  // ✅ 비밀번호 값 상태
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  // ✅ 비밀번호 보이기/숨기기 상태 (4개)
+  const [showCurrentPw, setShowCurrentPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
+  const [showWithdrawPw, setShowWithdrawPw] = useState(false); // 탈퇴 모달용
+
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedMenu, setSelectedMenu] = useState("editProfile");
   const [passwordError, setPasswordError] = useState("");
+  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+  const [withdrawPassword, setWithdrawPassword] = useState("");
+
   const toaster = useToaster();
   const router = useRouter();
   const axiosInstance = getAxiosInstance();
   const setUser = useUserStore((state) => state.setUser);
+  const logout = useUserStore((state) => state.logout);
 
   const { data: user, refetch } = useQuery({
     queryKey: ["User"],
@@ -39,13 +52,12 @@ export default function EditProfilePage() {
   const updateMutation = useMutation({
     mutationFn: editUserProfile,
     onSuccess: async () => {
-      const { data: latestUser } = await refetch(); // 최신 유저 데이터 받아오고
+      const { data: latestUser } = await refetch();
       if (latestUser) {
-        setUser(latestUser); // zustand 상태 업데이트
+        setUser(latestUser);
       }
       toaster("info", "프로필 수정 성공");
 
-      // 인풋창 상태 전부 초기화
       setNickname("");
       setSelectedImage(null);
       setCurrentPassword("");
@@ -58,6 +70,35 @@ export default function EditProfilePage() {
       toaster("warn", "수정에 실패했습니다.");
     },
   });
+
+  const handleWithdraw = async () => {
+    if (!withdrawPassword.trim()) {
+      toaster("warn", "비밀번호를 입력해주세요.");
+      return;
+    }
+
+    try {
+      await axiosInstance.delete("/users/delete", {
+        data: { currentPassword: withdrawPassword },
+      });
+
+      setIsWithdrawModalOpen(false);
+      logout();
+      toaster("info", "회원 탈퇴가 완료되었습니다.");
+      router.replace("/");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.error("회원 탈퇴 실패:", error);
+      const status = error.response?.status;
+      const serverMessage = error.response?.data?.message;
+
+      if (status === 401 || status === 400) {
+        toaster("warn", serverMessage || "비밀번호가 일치하지 않습니다.");
+      } else {
+        toaster("warn", "회원 탈퇴 중 오류가 발생했습니다.");
+      }
+    }
+  };
 
   const handleEditImage = () => {
     const input = document.createElement("input");
@@ -74,6 +115,46 @@ export default function EditProfilePage() {
   const isValid = currentPassword.trim() !== "";
 
   if (!user) return null;
+
+  // ✅ 눈 아이콘 SVG 컴포넌트 (재사용)
+  const EyeIcon = () => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+      className="h-5 w-5"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+      />
+    </svg>
+  );
+
+  const EyeOffIcon = () => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+      className="h-5 w-5"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
+      />
+    </svg>
+  );
 
   return (
     <div className="min-h-screen bg-white">
@@ -93,7 +174,7 @@ export default function EditProfilePage() {
         <div className="flex flex-col">
           <span className="text-black01 mb-6 text-[1.75rem] font-extrabold">내 정보 수정</span>
 
-          {/* 프로필 이미지 */}
+          {/* 프로필 이미지 (기존 동일) */}
           <div className="relative mb-6 h-24 w-24">
             <Image
               src={selectedImage ? URL.createObjectURL(selectedImage) : user.image}
@@ -131,41 +212,74 @@ export default function EditProfilePage() {
               onChange={(e) => setNickname(e.target.value)}
               placeholder={user.name}
             />
-            <ProfileInput
-              label="현재 비밀번호"
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              placeholder="현재 비밀번호 입력"
-            />
-            <ProfileInput
-              label="새 비밀번호 입력"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => {
-                setConfirmPassword(e.target.value);
-                if (newPassword && e.target.value !== newPassword) {
-                  setPasswordError("비밀번호가 일치하지 않습니다.");
-                } else {
-                  setPasswordError("");
-                }
-              }}
-              placeholder="변경할 비밀번호 입력"
-            />
-            <ProfileInput
-              label="새 비밀번호 확인"
-              type="password"
-              value={newPassword}
-              onChange={(e) => {
-                setNewPassword(e.target.value);
-                if (confirmPassword && e.target.value !== confirmPassword) {
-                  setPasswordError("비밀번호가 일치하지 않습니다.");
-                } else {
-                  setPasswordError("");
-                }
-              }}
-              placeholder="변경할 비밀번호 확인"
-            />
+
+            {/* ✅ 1. 현재 비밀번호 (위치 수정됨) */}
+            <div className="relative">
+              <ProfileInput
+                label="현재 비밀번호"
+                type={showCurrentPw ? "text" : "password"}
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="현재 비밀번호 입력"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrentPw(!showCurrentPw)}
+                className="absolute right-2 bottom-2.5 p-1 text-gray-400 hover:text-gray-600"
+              >
+                {showCurrentPw ? <EyeIcon /> : <EyeOffIcon />}
+              </button>
+            </div>
+
+            {/* ✅ 2. 새 비밀번호 입력 (위치 수정됨) */}
+            <div className="relative">
+              <ProfileInput
+                label="새 비밀번호 입력"
+                type={showNewPw ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  if (newPassword && e.target.value !== newPassword) {
+                    setPasswordError("비밀번호가 일치하지 않습니다.");
+                  } else {
+                    setPasswordError("");
+                  }
+                }}
+                placeholder="변경할 비밀번호 입력"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPw(!showNewPw)}
+                className="absolute right-2 bottom-2.5 p-1 text-gray-400 hover:text-gray-600"
+              >
+                {showNewPw ? <EyeIcon /> : <EyeOffIcon />}
+              </button>
+            </div>
+
+            {/* ✅ 3. 새 비밀번호 확인 (위치 수정됨) */}
+            <div className="relative">
+              <ProfileInput
+                label="새 비밀번호 확인"
+                type={showConfirmPw ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => {
+                  setNewPassword(e.target.value);
+                  if (confirmPassword && e.target.value !== confirmPassword) {
+                    setPasswordError("비밀번호가 일치하지 않습니다.");
+                  } else {
+                    setPasswordError("");
+                  }
+                }}
+                placeholder="변경할 비밀번호 확인"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPw(!showConfirmPw)}
+                className="absolute right-2 bottom-2.5 p-1 text-gray-400 hover:text-gray-600"
+              >
+                {showConfirmPw ? <EyeIcon /> : <EyeOffIcon />}
+              </button>
+            </div>
           </div>
 
           {/* 버튼 */}
@@ -182,14 +296,73 @@ export default function EditProfilePage() {
                   currentPassword,
                   nickname: nickname.trim() || undefined,
                   newPassword: newPassword.trim() || undefined,
-                  imageFile: selectedImage || null, // 이미지 파일 전달
+                  imageFile: selectedImage || null,
                 });
               }}
               disabled={!isValid || !!passwordError}
             />
           </div>
+
+          <div className="mt-10 flex justify-end border-t border-gray-200 pt-4">
+            <button
+              onClick={() => setIsWithdrawModalOpen(true)}
+              className="text-sm text-gray-500 underline decoration-gray-400 underline-offset-4 hover:text-red-600 hover:decoration-red-600"
+            >
+              회원 탈퇴하기
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* 회원 탈퇴 모달 */}
+      {isWithdrawModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="w-full max-w-[400px] rounded-lg bg-white p-6 shadow-lg">
+            <h2 className="text-xl font-bold text-red-600">회원 탈퇴</h2>
+            <p className="text-gray02 mt-2 text-sm">
+              탈퇴 시 모든 정보가 삭제되며 복구할 수 없습니다.
+              <br />
+              본인 확인을 위해 <strong>현재 비밀번호</strong>를 입력해 주세요.
+            </p>
+
+            {/* ✅ 4. 탈퇴 모달 비밀번호 입력 */}
+            <div className="relative mt-4">
+              <input
+                type={showWithdrawPw ? "text" : "password"} // 토글 적용
+                value={withdrawPassword}
+                onChange={(e) => setWithdrawPassword(e.target.value)}
+                placeholder="비밀번호 입력"
+                className="border-gray03 w-full rounded border px-3 py-2 pr-10 text-sm outline-none focus:border-black" // pr-10 추가(아이콘 공간)
+              />
+              <button
+                type="button"
+                onClick={() => setShowWithdrawPw(!showWithdrawPw)}
+                className="absolute top-1/2 right-2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600"
+              >
+                {showWithdrawPw ? <EyeIcon /> : <EyeOffIcon />}
+              </button>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setIsWithdrawModalOpen(false);
+                  setWithdrawPassword("");
+                }}
+                className="rounded px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleWithdraw}
+                className="rounded bg-red-600 px-4 py-2 text-sm font-bold text-white hover:bg-red-700"
+              >
+                탈퇴하기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

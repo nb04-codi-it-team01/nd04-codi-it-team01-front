@@ -109,11 +109,9 @@ export default function ShoppingPage() {
   const total = cart
     .filter((item) => item.checked)
     .reduce((sum, item) => {
-      const price = item.product.price;
-      const discountRate = item.product.discountRate;
-      const discountedPrice = Math.floor(price * (1 - discountRate / 100));
-      const itemTotal = discountedPrice * item.quantity;
-      return sum + itemTotal;
+      const finalPrice = item.product.discountPrice ?? item.product.price;
+
+      return sum + finalPrice * item.quantity;
     }, 0);
 
   const handleOrder = () => {

@@ -32,8 +32,11 @@ const ProductItem = ({ product, store = false }: ProductItemProps) => {
         {store && <p className="text-black02 mb-2.5 text-sm leading-none">{product.storeName}</p>}
         <p className="mb-2.5 overflow-hidden leading-5 font-bold text-ellipsis whitespace-nowrap">{product.name}</p>
         <div className="mb-2.5 flex gap-1.25 text-lg leading-5">
-          <p className="font-extrabold">{Math.floor(product.price * (1 - product.discountRate / 100)).toLocaleString()}원</p>
-          {product.discountRate !== 0 && (
+          {/* 1. 직접 계산하지 않고 백엔드가 준 최종 가격(discountPrice)을 사용합니다. */}
+          <p className="font-extrabold">{product.discountPrice.toLocaleString()}원</p>
+
+          {/* 2. 할인이 실제로 적용된 경우(정가 > 할인가)에만 취소선을 보여줍니다. */}
+          {product.price > product.discountPrice && (
             <p className="text-gray01 font-bold line-through">{product.price.toLocaleString()}원</p>
           )}
         </div>
