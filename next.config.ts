@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "http",
-        hostname: "localhost", // 이미지 테스트를 위한 임시 이미지 도메인 허용
+        hostname: "**", // 이미지 테스트를 위한 임시 이미지 도메인 허용
         port: "3001",
       },
     ],

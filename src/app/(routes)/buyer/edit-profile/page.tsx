@@ -23,10 +23,15 @@ export default function EditProfilePage() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedMenu, setSelectedMenu] = useState("editProfile");
   const [passwordError, setPasswordError] = useState("");
+  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+  const [withdrawPassword, setWithdrawPassword] = useState("");
+
   const toaster = useToaster();
   const router = useRouter();
   const axiosInstance = getAxiosInstance();
+  // ✅ [수정 1] setUser뿐만 아니라 logout도 가져옵니다.
   const setUser = useUserStore((state) => state.setUser);
+  const logout = useUserStore((state) => state.logout);
 
   const { data: user, refetch } = useQuery({
     queryKey: ["User"],
@@ -58,6 +63,35 @@ export default function EditProfilePage() {
       toaster("warn", "수정에 실패했습니다.");
     },
   });
+
+  // ✅ [수정 2] 회원 탈퇴 핸들러 함수 추가
+  const handleWithdraw = async () => {
+    if (!withdrawPassword.trim()) {
+      toaster("warn", "비밀번호를 입력해주세요.");
+      return;
+    }
+
+    try {
+      // DELETE 요청은 body를 보낼 때 'data' 옵션을 사용해야 합니다.
+      await axiosInstance.delete("/users/delete", {
+        data: { password: withdrawPassword }, // 백엔드로 비밀번호 전송
+      });
+
+      setIsWithdrawModalOpen(false); // 모달 닫기
+      logout(); // 로그아웃
+      toaster("info", "회원 탈퇴가 완료되었습니다.");
+      router.replace("/");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.error("회원 탈퇴 실패:", error);
+      // 백엔드에서 비밀번호 틀렸을 때 400이나 401을 준다고 가정
+      if (error.response?.status === 401 || error.response?.status === 400) {
+        toaster("warn", "비밀번호가 일치하지 않습니다.");
+      } else {
+        toaster("warn", "회원 탈퇴 중 오류가 발생했습니다.");
+      }
+    }
+  };
 
   const handleEditImage = () => {
     const input = document.createElement("input");
@@ -188,8 +222,58 @@ export default function EditProfilePage() {
               disabled={!isValid || !!passwordError}
             />
           </div>
+
+          <div className="mt-10 flex justify-end border-t border-gray-200 pt-4">
+            <button
+              onClick={() => setIsWithdrawModalOpen(true)} // ✅ 모달 열기
+              className="text-sm text-gray-500 underline decoration-gray-400 underline-offset-4 hover:text-red-600 hover:decoration-red-600"
+            >
+              회원 탈퇴하기
+            </button>
+          </div>
         </div>
       </div>
+      {/* ✅ [추가 3] 탈퇴 확인 모달 (JSX 맨 아래 </div> 바로 위에 넣으세요) */}
+      {isWithdrawModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="w-full max-w-[400px] rounded-lg bg-white p-6 shadow-lg">
+            <h2 className="text-xl font-bold text-red-600">회원 탈퇴</h2>
+            <p className="text-gray02 mt-2 text-sm">
+              탈퇴 시 모든 정보가 삭제되며 복구할 수 없습니다.
+              <br />
+              본인 확인을 위해 <strong>현재 비밀번호</strong>를 입력해 주세요.
+            </p>
+
+            <div className="mt-4">
+              <input
+                type="password"
+                value={withdrawPassword}
+                onChange={(e) => setWithdrawPassword(e.target.value)}
+                placeholder="비밀번호 입력"
+                className="border-gray03 w-full rounded border px-3 py-2 text-sm outline-none focus:border-black"
+              />
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setIsWithdrawModalOpen(false);
+                  setWithdrawPassword(""); // 비밀번호 초기화
+                }}
+                className="rounded px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleWithdraw}
+                className="rounded bg-red-600 px-4 py-2 text-sm font-bold text-white hover:bg-red-700"
+              >
+                탈퇴하기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

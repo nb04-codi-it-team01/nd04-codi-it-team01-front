@@ -71,6 +71,11 @@ export default function EditProfilePage() {
     input.click();
   };
 
+  const handleWithdrawClick = () => {
+    alert("판매자 탈퇴는 진행 중인 주문 및 정산 내역 확인이 필요합니다.\n고객센터로 문의해 주세요.");
+    // 또는 1:1 문의 페이지로 이동: router.push('/seller/cs/inquiry');
+  };
+
   const isValid = currentPassword.trim() !== "";
 
   if (!user) return null;
@@ -188,6 +193,16 @@ export default function EditProfilePage() {
               }}
               disabled={!isValid || !!passwordError}
             />
+          </div>
+
+          {/* ✅ [셀러용] 탈퇴 안내 버튼 */}
+          <div className="mt-10 flex justify-end border-t border-gray-200 pt-4">
+            <button
+              onClick={handleWithdrawClick}
+              className="text-sm text-gray-400 underline decoration-gray-300 underline-offset-4 hover:text-gray-600 hover:decoration-gray-600"
+            >
+              판매자 입점 해지 / 탈퇴 문의
+            </button>
           </div>
         </div>
       </div>
