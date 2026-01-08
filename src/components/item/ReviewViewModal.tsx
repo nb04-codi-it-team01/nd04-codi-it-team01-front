@@ -2,6 +2,7 @@ import Stars from "@/app/(routes)/products/[productId]/components/Stars";
 import Modal from "@/components/Modal";
 import { getAxiosInstance } from "@/lib/api/axiosInstance";
 import { useToaster } from "@/proviers/toaster/toaster.hook";
+import { useUserStore } from "@/stores/userStore";
 import { OrderItemResponse } from "@/types/order";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
@@ -19,6 +20,7 @@ export default function ReviewViewModal({ open, onClose, purchase }: ReviewViewM
   const axiosInstance = getAxiosInstance();
   const queryClient = useQueryClient();
   const toaster = useToaster();
+  const user = useUserStore((state) => state.user);
 
   // ✅ [State] 수정 모드 및 입력값 관리
   const [isEditing, setIsEditing] = useState(false);
@@ -183,7 +185,9 @@ export default function ReviewViewModal({ open, onClose, purchase }: ReviewViewM
                 rating={review.rating}
               />
               <div className="flex items-center gap-1">
-                <span className="text-black01 text-base/4.5 font-bold">{review.user?.name ?? "구매자"}</span>
+                <span className="text-black01 text-base/4.5 font-bold">
+                  {review.user?.name ?? user?.name ?? "구매자"}
+                </span>
                 <span className="text-gray01 text-base/4.5 font-normal">
                   {new Date(review.createdAt).toLocaleDateString()}
                 </span>
