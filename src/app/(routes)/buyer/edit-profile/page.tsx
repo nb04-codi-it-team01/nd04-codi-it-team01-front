@@ -65,9 +65,17 @@ export default function EditProfilePage() {
       setConfirmPassword("");
       setPasswordError("");
     },
-    onError: (error: AxiosError) => {
-      console.error("mutation 에러 발생:", error.response?.data || error.message);
-      toaster("warn", "수정에 실패했습니다.");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onError: (error: AxiosError<any>) => {
+      // 1. 백엔드에서 보낸 에러 데이터 확인
+      const serverData = error.response?.data;
+      console.error("서버 응답 데이터:", serverData);
+
+      // 2. 메시지 추출 (serverData.message 또는 serverData 자체가 문자열인 경우 대비)
+      const errorMessage = serverData?.message || "수정에 실패했습니다.";
+
+      // 3. 사용자에게 알림
+      toaster("warn", errorMessage);
     },
   });
 
