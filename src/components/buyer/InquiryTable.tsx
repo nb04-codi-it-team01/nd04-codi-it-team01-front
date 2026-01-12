@@ -136,15 +136,18 @@ export default function InquiryTable({ inquiries, userType }: InquiryTableProps)
                   </button>
                 )}
 
-                <button
-                  className="border-gray03 text-black01 hover:bg-black01 active:bg-black01 rounded-sm border px-3 py-[0.4375rem] text-base/4.5 font-bold transition-all duration-300 hover:text-white active:text-white"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDeleteTargetId(item); // ✅ 삭제는 항상 가능
-                  }}
-                >
-                  삭제
-                </button>
+                {/* ✅ 유저 타입이 SELLER가 아닐 때만 삭제 버튼 노출 */}
+                {userType !== "SELLER" && (
+                  <button
+                    className="border-gray03 text-black01 hover:bg-black01 active:bg-black01 rounded-sm border px-3 py-[0.4375rem] text-base/4.5 font-bold transition-all duration-300 hover:text-white active:text-white"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleteTargetId(item);
+                    }}
+                  >
+                    삭제
+                  </button>
+                )}
               </div>
             </div>
             {selectedId === item.id && <InquiryDetail inquiry={item} />}
