@@ -80,6 +80,27 @@ export default function ReviewViewModal({ open, onClose, purchase }: ReviewViewM
     return new Date(updated).getTime() > new Date(created).getTime();
   };
 
+  // ✨ [추가] 변경 사항이 있는지 확인하는 로직
+  const hasChanges = () => {
+    if (!review) return false;
+    // 내용이 다르거나, 별점이 다르면 변경된 것임
+    return editContent !== review.content || editRating !== review.rating;
+  };
+
+  // ✨ [추가] 닫기 버튼을 눌렀을 때 실행될 함수 (intercept)
+  const handleClose = () => {
+    // 1. 수정 모드이고 && 변경 사항이 있다면 -> 물어본다
+    if (isEditing && hasChanges()) {
+      if (confirm("작성 중인 내용이 있습니다. 닫으시겠습니까?")) {
+        setIsEditing(false); // 수정 모드 끄기
+        onClose(); // 진짜 닫기
+      }
+    } else {
+      // 2. 그냥 조회 중이거나 변경 사항이 없으면 -> 그냥 닫는다
+      setIsEditing(false);
+      onClose();
+    }
+  };
   if (!purchase || !review) return null;
 
   const handleDelete = () => {
@@ -104,12 +125,12 @@ export default function ReviewViewModal({ open, onClose, purchase }: ReviewViewM
   return (
     <Modal
       isOpen={open}
-      onClose={onClose}
+      onClose={handleClose}
     >
       <div className="relative w-[600px]">
         <button
           className="absolute top-0 right-0"
-          onClick={onClose}
+          onClick={handleClose}
         >
           <Image
             src="/icon/deleteBlack.svg"

@@ -23,10 +23,11 @@ export default function SignupPage() {
       router.push("/login");
     },
     onError: (error: unknown) => {
-      if (axios.isAxiosError(error) && error.response?.status === 409) {
-        toaster("warn", "이미 존재하는 이메일입니다. 다른 이메일을 사용해주세요.");
+      if (axios.isAxiosError(error)) {
+        const message = error.response?.data?.message || "회원가입 중 오류가 발생했습니다.";
+        toaster("warn", message);
       } else {
-        toaster("warn", "회원가입 중 오류가 발생했습니다.");
+        toaster("warn", "알 수 없는 오류가 발생했습니다.");
       }
     },
   });

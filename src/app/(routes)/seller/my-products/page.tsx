@@ -53,9 +53,20 @@ export default function MyProductsPage() {
         </div>
         {isLoading ? (
           <div className="px-6 py-10">스토어 정보를 불러오는 중...</div>
-        ) : (axios.isAxiosError(error) && error.response?.status === 404) || store === null ? (
+        ) : store === null ? (
+          /* 1. 스토어가 없는 것이 확인된 경우 (404 처리 결과) */
           <div className="px-6 py-10 text-red-500">아직 스토어가 생성되지 않았습니다.</div>
+        ) : error ? (
+          /* 2. 스토어 조회 중 진짜 에러(500 등)가 발생한 경우 */
+          <div className="px-6 py-10 text-red-500">
+            {axios.isAxiosError(error)
+              ? error.response?.data?.errorMessage ||
+                error.response?.data?.message ||
+                "스토어 정보를 가져오지 못했습니다."
+              : "알 수 없는 오류가 발생했습니다."}
+          </div>
         ) : (
+          /* 3. 정상적으로 스토어 정보를 가져온 경우 */
           <ProductTable />
         )}
       </div>

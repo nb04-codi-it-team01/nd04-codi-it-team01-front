@@ -23,12 +23,20 @@ export default function LoggedInMenu({ user }: LoggedInMenuProps) {
       logout();
       toaster("info", "성공적으로 로그아웃되었습니다.");
     },
-    onError: (error) => {
-      if (axios.isAxiosError(error) && error.response?.status === 401) {
-        toaster("warn", "인증이 필요합니다.");
-      } else {
-        toaster("warn", "로그아웃에 실패했습니다.");
+    onError: (error: unknown) => {
+      let message = "로그아웃에 실패했습니다.";
+
+      if (axios.isAxiosError(error)) {
+        const data = error.response?.data;
+
+        message = data?.errorMessage || data?.message || message;
+
+        if (error.response?.status === 401 && !data?.message) {
+          message = "인증이 만료되었습니다. 다시 로그인해주세요.";
+        }
       }
+
+      toaster("warn", message);
       logout();
     },
   });
