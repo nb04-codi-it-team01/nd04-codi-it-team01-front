@@ -5,8 +5,10 @@ import OrderPointSection from "@/components/order/OrderPointSection";
 import OrderProductList from "@/components/order/OrderProductList";
 import OrderSummary from "@/components/order/OrderSummary";
 import { getAxiosInstance } from "@/lib/api/axiosInstance";
+import { useToaster } from "@/proviers/toaster/toaster.hook";
 import { useOrderStore } from "@/store/orderStore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 
@@ -16,6 +18,7 @@ export default function OrderPage() {
   const queryClient = useQueryClient();
   const { selectedItems, getOrderRequest, reset } = useOrderStore();
   const isOrderCompleted = useRef(false);
+  const toaster = useToaster();
 
   // 선택된 아이템이 없으면 장바구니 페이지로 리다이렉트
   useEffect(() => {
@@ -23,37 +26,6 @@ export default function OrderPage() {
       router.replace("/buyer/shopping");
     }
   }, [selectedItems, router]);
-
-  // 장바구니 아이템 삭제 mutation
-  // const deleteCartItemsMutation = useMutation({
-  //   mutationFn: async () => {
-  //     const deletePromises = selectedItems.map((item) => axiosInstance.delete(`/cart/${item.id}`));
-  //     await Promise.all(deletePromises);
-  //   },
-  // });
-
-  // 주문 생성 mutation
-  // const createOrderMutation = useMutation({
-  //   mutationFn: async () => {
-  //     const orderData = getOrderRequest();
-  //     await axiosInstance.post("/orders", orderData);
-  //   },
-  //   onSuccess: async () => {
-  //     try {
-  //       // 주문 성공 후 장바구니에서 주문한 아이템들 삭제
-  //       await deleteCartItemsMutation.mutateAsync();
-  //       isOrderCompleted.current = true; // 주문 완료 플래그 설정
-  //       reset();
-  //       router.replace("/buyer/mypage");
-  //     } catch (error) {
-  //       console.error("장바구니 아이템 삭제 중 오류 발생:", error);
-  //       // 장바구니 삭제 실패해도 주문은 성공했으므로 마이페이지로 이동
-  //       isOrderCompleted.current = true; // 주문 완료 플래그 설정
-  //       reset();
-  //       router.replace("/buyer/mypage");
-  //     }
-  //   },
-  // });
 
   const createOrderMutation = useMutation({
     mutationFn: async () => {
@@ -74,9 +46,19 @@ export default function OrderPage() {
       // 3. 페이지 이동
       router.replace("/buyer/mypage");
     },
-    onError: (error) => {
-      console.error("주문 생성 실패:", error);
-      // 필요하다면 토스트 메시지 등 에러 처리
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onError: (error: AxiosError<any>) => {
+      // 1. 에러 응답 데이터가 있는지 확인
+      const serverResponse = error.response?.data;
+
+      // 2. 백엔드 errorHandler가 심어준 message 추출
+      const errorMessage = serverResponse?.message || "주문 처리 중 오류가 발생했습니다.";
+
+      // 3. 토스터나 얼럿으로 노출
+      toaster("warn", errorMessage);
+
+      // 디버깅을 위해 콘솔에 찍을 때도 data를 찍어야 함
+      console.error("백엔드가 보낸 진짜 메시지:", errorMessage);
     },
   });
 

@@ -26,6 +26,15 @@ export default function InquiryDeleteModal({ open, inquiry, onClose }: InquiryDe
       toaster("info", "문의가 삭제됐습니다.");
       onClose();
     },
+    // ✅ 에러 핸들링 추가
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onError: (error: any) => {
+      // 백엔드 errorHandler가 보내주는 { message: "..." } 추출
+      const serverMessage = error.response?.data?.message;
+      toaster("warn", serverMessage || "삭제 권한이 없거나 오류가 발생했습니다.");
+
+      console.error("삭제 실패:", serverMessage);
+    },
   });
 
   const handleDelete = () => {
