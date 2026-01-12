@@ -26,23 +26,27 @@ export default function LoginPage() {
       router.push("/products");
     },
     onError: (error: unknown) => {
-      let message = "";
+      let message = "알 수 없는 오류가 발생했습니다.";
+
       if (axios.isAxiosError(error)) {
-        switch (error.response?.status) {
-          case 400:
-            message = "잘못된 요청입니다.";
-            break;
-          case 401:
-            message = "이메일 또는 비밀번호가 올바르지 않습니다.";
-            break;
-          case 404:
-            message = "사용자를 찾을 수 없습니다.";
-            break;
-          default:
-            message = "로그인 중 오류가 발생했습니다.";
+        // 1순위: 백엔드에서 보낸 에러 메시지가 있는지 확인
+        const serverMessage = error.response?.data?.message;
+
+        if (serverMessage) {
+          message = serverMessage;
+        } else {
+          // 2순위: 메시지가 없을 경우 상태 코드별 기본 메시지(Fallback)
+          switch (error.response?.status) {
+            case 401:
+              message = "이메일 또는 비밀번호가 올바르지 않습니다.";
+              break;
+            case 404:
+              message = "사용자를 찾을 수 없습니다.";
+              break;
+            default:
+              message = "로그인 중 오류가 발생했습니다.";
+          }
         }
-      } else {
-        message = "알 수 없는 오류가 발생했습니다.";
       }
       toaster("warn", message);
     },
