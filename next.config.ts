@@ -5,12 +5,9 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**", // 이미지 테스트를 위한 외부 이미지 도메인 허용
-      },
-      {
-        protocol: "http",
-        hostname: "**", // 이미지 테스트를 위한 임시 이미지 도메인 허용
-        port: "3001",
+        hostname: "codiit-team1-images.s3.ap-northeast-2.amazonaws.com",
+        port: "",
+        pathname: "/**",
       },
     ],
   },

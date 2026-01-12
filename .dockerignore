@@ -1,0 +1,36 @@
+# 의존성 및 빌드 결과물
+node_modules
+.next
+out
+build
+
+# 로그 파일
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# 환경 변수 파일 (보안을 위해 이미지에 포함하지 않음)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Git 관련
+.git
+.gitignore
+
+# OS 관련 파일
+.DS_Store
+Thumbs.db
+
+# 에디터 설정
+.vscode
+.idea
+*.swp
+*.swo
+
+# 도커 관련
+Dockerfile
+.dockerignore
